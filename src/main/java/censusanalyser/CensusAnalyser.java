@@ -1,7 +1,4 @@
 package censusanalyser;
-
-import com.opencsv.bean.CsvToBean;
-import com.opencsv.bean.CsvToBeanBuilder;
 import java.io.IOException;
 import java.io.Reader;
 import java.nio.file.Files;
@@ -13,7 +10,7 @@ public class CensusAnalyser {
 
     public int loadIndiaCensusData(String csvFilePath) {
         try (Reader reader = Files.newBufferedReader(Paths.get(csvFilePath))){
-            Iterator<IndiaCensusCSV> censusCSVIterator = getCsvFileIterator(reader,IndiaCensusCSV.class);
+            Iterator<IndiaCensusCSV> censusCSVIterator = new OpenCsvBuilder().getCsvFileIterator(reader,IndiaCensusCSV.class);
             return getCount(censusCSVIterator);
         }
         catch (IOException e) {
@@ -27,17 +24,10 @@ public class CensusAnalyser {
         return numOfEntries;
     }
 
-    private <E> Iterator<E> getCsvFileIterator(Reader reader,Class csvClass) {
-        CsvToBeanBuilder<E> csvToBeanBuilder = new CsvToBeanBuilder<>(reader);
-        csvToBeanBuilder.withType(csvClass);
-        csvToBeanBuilder.withIgnoreLeadingWhiteSpace(true);
-        CsvToBean<E> csvToBean= csvToBeanBuilder.build();
-        return csvToBean.iterator();
-    }
 
     public int loadIndianStateCode(String csvFilePath) {
         try(Reader reader=Files.newBufferedReader(Paths.get(csvFilePath))) {
-            Iterator<IndiaStateCodeData> codeDataIterator = getCsvFileIterator(reader,IndiaStateCodeData.class);
+            Iterator<IndiaStateCodeData> codeDataIterator = new OpenCsvBuilder().getCsvFileIterator(reader,IndiaStateCodeData.class);
             return getCount(codeDataIterator);
         }
         catch (IOException e) {
