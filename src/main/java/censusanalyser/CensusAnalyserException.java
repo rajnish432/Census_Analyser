@@ -3,7 +3,7 @@ package censusanalyser;
 public class CensusAnalyserException extends RuntimeException {
 
     enum ExceptionType {
-        CENSUS_FILE_PROBLEM,CENSUS_TYPE_PROBLEM;
+        CENSUS_FILE_PROBLEM,CENSUS_TYPE_PROBLEM,NO_CENSUS_DATA;
     }
 
     ExceptionType type;
