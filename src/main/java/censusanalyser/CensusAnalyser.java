@@ -1,10 +1,6 @@
 package censusanalyser;
-import com.google.gson.Gson;
 
-import java.io.IOException;
-import java.io.Reader;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import com.google.gson.Gson;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -21,13 +17,13 @@ public class CensusAnalyser {
         this.censusMap=new HashMap<>();
     }
 
-    public int loadIndiaCensusData(String csvFilePath) {
-        censusMap=censusLoader.loadCensusData(csvFilePath,IndiaCensusCSV.class);
+    public int loadIndiaCensusData(String... csvFilePath) {
+        censusMap=censusLoader.loadCensusData(IndiaCensusCSV.class,csvFilePath);
        return censusMap.size();
     }
 
-    public int loadUSCensusData(String usCensusFilePath) {
-        censusMap=censusLoader.loadCensusData(usCensusFilePath,USCensusData.class);
+    public int loadUSCensusData(String... usCensusFilePath) {
+        censusMap=censusLoader.loadCensusData(USCensusData.class,usCensusFilePath);
         return censusMap.size();
     }
 
@@ -37,23 +33,6 @@ public class CensusAnalyser {
         int numOfEntries=(int) StreamSupport.stream(csvIterable.spliterator(),false).count();
         return numOfEntries;
     }
-
-
-    public int loadIndianStateCode(String csvFilePath) {
-        try(Reader reader=Files.newBufferedReader(Paths.get(csvFilePath))) {
-            ICsvBuilder openCsvBuilder = CsvBuilderFactory.getOpenCsvBuilder();
-            Iterator<IndiaStateCodeData> codeDataIterator = openCsvBuilder.getCsvFileIterator(reader,IndiaStateCodeData.class);
-            Iterable<IndiaStateCodeData> iterableStateCode=() ->codeDataIterator;
-            StreamSupport.stream(iterableStateCode.spliterator(),false)
-                        .filter(csvState->censusMap.get(csvState.stateName)!=null)
-                        .forEach(csvState->censusMap.get(csvState.stateName).state=csvState.stateCode);
-            return censusMap.size();
-        }
-        catch (IOException e) {
-            throw new CensusAnalyserException(e.getMessage(), CensusAnalyserException.ExceptionType.CENSUS_FILE_PROBLEM);
-        }
-    }
-
 
     public String getStateWiseSortedData() {
         collectList=censusMap.values().stream().collect(Collectors.toList());
