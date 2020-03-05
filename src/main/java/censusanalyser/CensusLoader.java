@@ -12,7 +12,17 @@ import java.util.stream.StreamSupport;
 public class CensusLoader {
     Map<String, CensusDTO> censusMap=new HashMap<>();
 
-    public <E> Map<String,CensusDTO> loadCensusData(Class<E> censusCsvClass, String... csvFilePath) {
+    public Map<String, CensusDTO> loadCensusCountryData(CensusAnalyser.Country country, String... csvFilePath) {
+    if(country.equals(CensusAnalyser.Country.INDIA)){
+       return loadCensusData(IndiaCensusCSV.class,csvFilePath);
+    }else if (country.equals(CensusAnalyser.Country.US)){
+       return loadCensusData(USCensusData.class,csvFilePath);
+    }
+    else {
+        throw new CensusAnalyserException("No Such Country",CensusAnalyserException.ExceptionType.NO_SUCH_COUNTRY);
+    }
+    }
+    private  <E> Map<String,CensusDTO> loadCensusData(Class<E> censusCsvClass, String... csvFilePath) {
 
             try (Reader reader = Files.newBufferedReader(Paths.get(csvFilePath[0]))){
                 ICsvBuilder openCsvBuilder = CsvBuilderFactory.getOpenCsvBuilder();
@@ -52,4 +62,6 @@ public class CensusLoader {
             throw new CensusAnalyserException(e.getMessage(), CensusAnalyserException.ExceptionType.CENSUS_FILE_PROBLEM);
         }
     }
+
+
 }
