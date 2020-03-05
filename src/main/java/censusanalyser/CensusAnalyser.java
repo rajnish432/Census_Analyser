@@ -14,6 +14,7 @@ public class CensusAnalyser {
     List<CensusDTO> censusListDto=null;
     Map<String, CensusDTO> censusMap=null;
     List<CensusDTO> collectList=null;
+    CensusLoader censusLoader = new CensusLoader();
 
     public CensusAnalyser() {
         this.censusListDto=new ArrayList<>();
@@ -21,36 +22,15 @@ public class CensusAnalyser {
     }
 
     public int loadIndiaCensusData(String csvFilePath) {
-        return loadCensusData(csvFilePath,IndiaCensusCSV.class);
+        censusMap=censusLoader.loadCensusData(csvFilePath,IndiaCensusCSV.class);
+       return censusMap.size();
     }
 
     public int loadUSCensusData(String usCensusFilePath) {
-        return loadCensusData(usCensusFilePath,USCensusData.class);
+        censusMap=censusLoader.loadCensusData(usCensusFilePath,USCensusData.class);
+        return censusMap.size();
     }
 
-    private <E>int loadCensusData(String csvFilePath,Class<E> censusCsvClass) {
-        try (Reader reader = Files.newBufferedReader(Paths.get(csvFilePath))){
-            ICsvBuilder openCsvBuilder = CsvBuilderFactory.getOpenCsvBuilder();
-            Iterator<E> censusCSVIterator = openCsvBuilder.getCsvFileIterator(reader,censusCsvClass);
-            Iterable<E> iterable=() -> censusCSVIterator;
-            if (censusCsvClass.getName().equals("censusanalyser.IndiaCensusCSV")) {
-                StreamSupport.stream(iterable.spliterator(), false)
-                        .map(IndiaCensusCSV.class::cast)
-                        .forEach(csvState -> censusMap.put(csvState.state, new CensusDTO(csvState)));
-            }
-            if (censusCsvClass.getName().equals("censusanalyser.USCensusData"))
-            {
-                StreamSupport.stream(iterable.spliterator(), false)
-                        .map(USCensusData.class::cast)
-                        .forEach(csvState -> censusMap.put(csvState.state, new CensusDTO(csvState)));
-            }
-            collectList = censusMap.values().stream().collect(Collectors.toList());
-            return collectList.size();
-        }
-        catch (IOException e) {
-            throw new CensusAnalyserException(e.getMessage(), CensusAnalyserException.ExceptionType.CENSUS_FILE_PROBLEM);
-        }
-    }
 
     private <E> int getCount(Iterator<E> censusCSVIterator) {
         Iterable<E> csvIterable=() -> censusCSVIterator;
@@ -76,7 +56,8 @@ public class CensusAnalyser {
 
 
     public String getStateWiseSortedData() {
-            if (collectList==null || collectList.size()==0)
+        collectList=censusMap.values().stream().collect(Collectors.toList());
+        if (collectList==null || collectList.size()==0)
             {
                 throw new CensusAnalyserException("No such Data Found",CensusAnalyserException.ExceptionType.NO_CENSUS_DATA);
             }
@@ -102,6 +83,7 @@ public class CensusAnalyser {
     }
 
     public String getStateWisePopulatedData() {
+        collectList=censusMap.values().stream().collect(Collectors.toList());
         if (collectList==null || collectList.size()==0)
         {
             throw new CensusAnalyserException("No such Data Found",CensusAnalyserException.ExceptionType.NO_CENSUS_DATA);
@@ -113,6 +95,7 @@ public class CensusAnalyser {
     }
 
     public String getStateWiseDenseData() {
+        collectList=censusMap.values().stream().collect(Collectors.toList());
         if (collectList==null || collectList.size()==0)
         {
             throw new CensusAnalyserException("No such Data Found",CensusAnalyserException.ExceptionType.NO_CENSUS_DATA);
