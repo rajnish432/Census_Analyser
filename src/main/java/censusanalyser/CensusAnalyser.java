@@ -10,7 +10,7 @@ public class CensusAnalyser {
     List<CensusDTO> censusListDto=null;
     Map<String, CensusDTO> censusMap=null;
     List<CensusDTO> collectList=null;
-    CensusLoader censusLoader = new CensusLoader();
+    IndianCensusAdapter censusLoader = new IndianCensusAdapter();
     enum Country{
         INDIA,US;
     }
@@ -20,9 +20,13 @@ public class CensusAnalyser {
         this.censusMap=new HashMap<>();
     }
 
-    public int loadCensusData(Country country,String... csvFilePath) {
-        censusMap=censusLoader.loadCensusCountryData(country,csvFilePath);
+    public int loadCensusDatas(Country country,String... csvFilePath) {
+        censusMap=CensusAdapterFactory.getCensusData(country,csvFilePath);
        return censusMap.size();
+    }
+    public int loadUSCensusData(Country country,String... csvFilePath) {
+        censusMap=censusLoader.loadCensusData(country,csvFilePath);
+        return censusMap.size();
     }
 
     private <E> int getCount(Iterator<E> censusCSVIterator) {
