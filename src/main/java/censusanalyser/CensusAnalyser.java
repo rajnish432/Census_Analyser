@@ -1,9 +1,7 @@
 package censusanalyser;
-
 import com.google.gson.Gson;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 public class CensusAnalyser {
 
@@ -11,11 +9,19 @@ public class CensusAnalyser {
     Map<String, CensusDTO> censusMap=null;
     List<CensusDTO> collectList=null;
     IndianCensusAdapter censusLoader = new IndianCensusAdapter();
+    Map<SortField,Comparator<CensusDTO>> sortMap;
+
     enum Country{
         INDIA,US;
     }
-
     public CensusAnalyser() {
+        sortMap=new HashMap<>();
+        this.sortMap.put(SortField.STATE,Comparator.comparing(census-> census.state));
+        this.sortMap.put(SortField.POPULATION,Comparator.comparing(census-> census.population));
+        this.sortMap.put(SortField.TOTALAREA,Comparator.comparing(census->census.totalArea));
+        this.sortMap.put(SortField.POPULATIONDENSITY,Comparator.comparing(census-> census.populationDensity));
+        this.sortMap.put(SortField.STATECODE,Comparator.comparing(census->census.stateCode));
+        this.sortMap.put(SortField.STATEID,Comparator.comparing(census-> census.stateID));
         this.censusListDto=new ArrayList<>();
         this.censusMap=new HashMap<>();
     }
@@ -24,37 +30,15 @@ public class CensusAnalyser {
         censusMap=CensusAdapterFactory.getCensusData(country,csvFilePath);
        return censusMap.size();
     }
-    public int loadUSCensusData(Country country,String... csvFilePath) {
-        censusMap=censusLoader.loadCensusData(country,csvFilePath);
-        return censusMap.size();
-    }
 
-    private <E> int getCount(Iterator<E> censusCSVIterator) {
-        Iterable<E> csvIterable=() -> censusCSVIterator;
-        int numOfEntries=(int) StreamSupport.stream(csvIterable.spliterator(),false).count();
-        return numOfEntries;
-    }
-
-    public String getStateWiseSortedData() {
-        collectList=censusMap.values().stream().collect(Collectors.toList());
-        if (collectList==null || collectList.size()==0)
-            {
-                throw new CensusAnalyserException("No such Data Found",CensusAnalyserException.ExceptionType.NO_CENSUS_DATA);
-            }
-            Comparator<CensusDTO> indiaCensusCSVComparator=Comparator.comparing(census ->census.state);
-            this.sort(indiaCensusCSVComparator);
-            String sortedStateCensus=new Gson().toJson(collectList);
-            return sortedStateCensus;
-    }
-
-    private void sort(Comparator<CensusDTO> indiaCensusDTOComparator) {
+    private void sort(List<CensusDTO> collectList, Comparator<CensusDTO> sortField) {
         for (int i=0;i<collectList.size()-1;i++)
         {
             for (int j=0;j<collectList.size()-i-1;j++)
             {
                 CensusDTO census1= collectList.get(j);
                 CensusDTO census2=collectList.get(j+1);
-                if (indiaCensusDTOComparator.compare(census1,census2)>0) {
+                if (sortField.compare(census1,census2)>0) {
                     collectList.set(j, census2);
                     collectList.set(j + 1, census1);
                 }
@@ -62,29 +46,24 @@ public class CensusAnalyser {
         }
     }
 
-    public String getStateWisePopulatedData() {
+    public String getSortedData(SortField sortField) {
         collectList=censusMap.values().stream().collect(Collectors.toList());
-        if (collectList==null || collectList.size()==0)
-        {
-            throw new CensusAnalyserException("No such Data Found",CensusAnalyserException.ExceptionType.NO_CENSUS_DATA);
+        if (collectList==null || collectList.size()==0) {
+            throw new CensusAnalyserException("No such Data Found", CensusAnalyserException.ExceptionType.NO_CENSUS_DATA);
         }
-        Comparator<CensusDTO> indiaCensusDTOComparator2=Comparator.comparing(census ->census.population);
-        this.sort(indiaCensusDTOComparator2);
+        this.sort(collectList,this.sortMap.get(sortField));
         String sortedStatePopulation=new Gson().toJson(collectList);
         return sortedStatePopulation;
     }
 
-    public String getStateWiseDenseData() {
+    public String getReversedSortedData(SortField sortField) {
         collectList=censusMap.values().stream().collect(Collectors.toList());
-        if (collectList==null || collectList.size()==0)
-        {
-            throw new CensusAnalyserException("No such Data Found",CensusAnalyserException.ExceptionType.NO_CENSUS_DATA);
+        if (collectList==null || collectList.size()==0) {
+            throw new CensusAnalyserException("No such Data Found", CensusAnalyserException.ExceptionType.NO_CENSUS_DATA);
         }
-        Comparator<CensusDTO> indiaCensusDTOComparator1=Comparator.comparing(census ->census.populationDensity);
-        this.sort(indiaCensusDTOComparator1);
+        this.sort(collectList,this.sortMap.get(sortField));
+        Collections.reverse(collectList);
         String sortedStatePopulation=new Gson().toJson(collectList);
         return sortedStatePopulation;
     }
-
-
 }

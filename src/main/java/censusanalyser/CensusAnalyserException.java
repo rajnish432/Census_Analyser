@@ -3,7 +3,7 @@ package censusanalyser;
 public class CensusAnalyserException extends RuntimeException {
 
     enum ExceptionType {
-        CENSUS_FILE_PROBLEM,CENSUS_TYPE_PROBLEM,NO_CENSUS_DATA,NO_SUCH_COUNTRY  ;
+        CENSUS_FILE_PROBLEM,NO_CENSUS_DATA,NO_SUCH_COUNTRY  ;
     }
 
     ExceptionType type;
@@ -13,8 +13,4 @@ public class CensusAnalyserException extends RuntimeException {
         this.type = type;
     }
 
-    public CensusAnalyserException(String message, ExceptionType type, Throwable cause) {
-        super(message, cause);
-        this.type = type;
-    }
 }

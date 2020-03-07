@@ -23,7 +23,7 @@ public abstract class CensusAdapter extends RuntimeException {
                         .map(IndiaCensusCSV.class::cast)
                         .forEach(csvState -> censusMap.put(csvState.state, new CensusDTO(csvState)));
             }
-            if (censusCsvClass.getName().equals("censusanalyser.USCensusData"))
+           else if (censusCsvClass.getName().equals("censusanalyser.USCensusData"))
             {
                 StreamSupport.stream(iterable.spliterator(), false)
                         .map(USCensusData.class::cast)
